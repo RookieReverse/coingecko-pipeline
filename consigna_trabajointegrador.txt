@@ -1,0 +1,65 @@
+
+📄 Respuestas al Trabajo Práctico: Data pipeline con CoinGecko y Delta Lake
+
+✅ Parte 1 – Extracción y carga en formato Delta Lake
+
+1. API utilizada
+Se utilizó la API pública de CoinGecko (https://www.coingecko.com/en/api/documentation), que ofrece información actualizada sobre criptomonedas y sus mercados.
+
+2. Endpoints seleccionados
+- /coins/list: 
+  - Tipo de datos: estáticos (metadatos de monedas)
+  - Técnica de extracción: Full
+  - Frecuencia de cambio: poco frecuente
+
+- /coins/markets:
+  - Tipo de datos: dinámicos (precios, volumen, etc.)
+  - Técnica de extracción: Incremental
+  - Frecuencia de cambio: minuto a minuto
+
+3. Librerías utilizadas
+- requests → para obtener los datos desde la API
+- pandas → para manipular los datos como DataFrames
+- deltalake y pyarrow → para guardar en formato Delta Lake
+
+4. Conversión y guardado en Delta Lake
+Cada conjunto de datos se convierte a DataFrame y se guarda en un directorio dedicado dentro del datalake:
+
+- bronze/: Datos crudos con mínimas transformaciones
+- Particiones aplicadas:
+  - markets: particionado por coin, date, day, hour
+  - coins/list: particionado por date, hour
+
+Se utiliza el archivo state/last_extraction.json para controlar la extracción incremental.
+
+✅ Parte 2 – Transformaciones con Pandas
+
+Se aplicaron al menos 4 transformaciones a los datos crudos de bronze y se guardaron los resultados en silver.
+
+Transformaciones aplicadas:
+1. Eliminación de duplicados → usando columnas id + last_updated
+2. Reemplazo de valores nulos → usando fillna con un mapa de imputación
+3. Conversión de tipos → cast a tipos óptimos para eficiencia de memoria
+4. Creación de columnas:
+   - avg_price: precio promedio por moneda
+   - is_high_value: True si el precio > 50.000 USD
+5. Agregaciones estadísticas por moneda
+6. Renombrado de columnas para mejor claridad
+
+🗂️ Estructura del Data Lake
+
+datalake/
+├── bronze/
+│   └── coingecko/
+│       ├── markets/
+│       └── coins/
+└── silver/
+    └── coingecko/
+        ├── markets/
+        └── coins/
+
+🛠️ Consideraciones Técnicas
+- El pipeline es ejecutado por main.py
+- Se verifica la última ejecución para extracción incremental
+- Se aplican validaciones, logs y manejo de errores
+
