@@ -4,9 +4,6 @@ This project performs an ELT (Extract, Load, Transform) pipeline on cryptocurren
 
 📂 Project Structure
 
-pgsql
-Copy
-Edit
 elt_coingecko/
 │
 ├── main.py                       # Main script to orchestrate the pipeline
@@ -22,6 +19,12 @@ elt_coingecko/
 │   └── silver/                  # Transformed data for analysis
 └── state/                       # Last run control
     └── last_extraction.json
+
+
+
+
+
+
 ⚙️ Features
 
 Extraction
@@ -46,10 +49,8 @@ Derived flags (e.g., is_high_value if price exceeds $50,000)
 
 🧪 Pipeline Execution
 
-bash
-Copy
-Edit
 python main.py
+
 The script performs:
 
 Check the time since the last run (every 1 hour)
