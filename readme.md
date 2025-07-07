@@ -1,88 +1,96 @@
-Proyecto: ETL de CoinGecko con Delta Lake
+Project: CoinGecko ETL with Delta Lake
 
-Este proyecto realiza un pipeline de extracción, transformación y carga (ELT) sobre datos de criptomonedas obtenidos desde la API pública de CoinGecko, almacenando los datos en formato Delta Lake en una estructura particionada.
+This project performs an ELT (Extract, Load, Transform) pipeline on cryptocurrency data obtained from the public CoinGecko API, storing the data in Delta Lake format using a partitioned structure.
 
-📂 Estructura del Proyecto
+📂 Project Structure
 
+pgsql
+Copy
+Edit
 elt_coingecko/
 │
-├── main.py                       # Script principal de orquestación del pipeline
-├── extract.py                    # Extracción de datos desde la API de CoinGecko
-├── process_markets.py           # Transformación y carga de datos de mercado (markets)
-├── process_coinlist.py          # Transformación y carga de datos de monedas (coin list)
-├── schema.py                    # Esquema y definiciones de columnas y tipos
-├── delta_utils.py               # Funciones auxiliares para guardar/upsert en Delta Lake
+├── main.py                       # Main script to orchestrate the pipeline
+├── extract.py                    # Data extraction from the CoinGecko API
+├── process_markets.py           # Transformation and loading of market data
+├── process_coinlist.py          # Transformation and loading of coin list data
+├── schema.py                    # Schema and column/type definitions
+├── delta_utils.py               # Helper functions to save/upsert to Delta Lake
 ├── utils/
-│   └── data_validation.py       # Validación y conversión de columnas para los datasets
+│   └── data_validation.py       # Column validation and conversion for datasets
 ├── datalake/
-│   ├── bronze/                  # Datos crudos particionados
-│   └── silver/                  # Datos transformados para análisis
-└── state/                       # Control de última ejecución
+│   ├── bronze/                  # Raw partitioned data
+│   └── silver/                  # Transformed data for analysis
+└── state/                       # Last run control
     └── last_extraction.json
+⚙️ Features
 
-⚙️ Funcionalidades
+Extraction
 
-Extracción
+/coins/list: Static reference data for cryptocurrencies (FULL extraction)
 
-/coins/list: Datos de referencia estáticos de criptomonedas (FULL extraction)
+/markets: Market data (price, volume, etc.) per coin (INCREMENTAL extraction)
 
-/markets: Datos de mercado (precio, volumen, etc) por moneda (INCREMENTAL extraction)
+Transformation (Silver Layer)
 
-Transformación (Silver Layer)
+Validation of required columns (REQUIRED_COLUMNS)
 
-Validación de columnas requeridas (REQUIRED_COLUMNS)
+Column typing (TYPE_MAP)
 
-Tipado de columnas (TYPE_MAP)
+Null value imputation (IMPUTATION_MAP)
 
-Imputación de valores nulos (IMPUTATION_MAP)
+Duplicate removal using primary key: id, last_updated
 
-Eliminacion de duplicados usando como llave primaria : id, last_updated
+Metric aggregation (e.g., average price per coin)
 
-Agregado de métricas (ej: promedio de precios por moneda)
+Derived flags (e.g., is_high_value if price exceeds $50,000)
 
-Flags derivados (ej: is_high_value si el precio supera los $50,000)
+🧪 Pipeline Execution
 
-🧪 Ejecución del Pipeline
-
+bash
+Copy
+Edit
 python main.py
+The script performs:
 
-El script realiza:
+Check the time since the last run (every 1 hour)
 
-Verificación del tiempo desde la última ejecución (cada 1 hora)
+Extraction and storage in bronze
 
-Extracción y almacenamiento en bronze
+Processing and saving to silver
 
-Procesamiento y guardado en silver
-
-🪙 Particiones del Delta Lake
+🪙 Delta Lake Partitions
 
 Markets: coin, date, day, hour
 
 Coinlist: date, hour
 
-📌 Requisitos (requirements.txt)
+📌 Requirements (requirements.txt)
 
-Asegurate de tener los siguientes paquetes instalados:
+Make sure the following packages are installed:
 
 pandas
+
 pyarrow
+
 deltalake
+
 requests
 
-✨ Mejoras posibles
+✨ Possible Improvements
 
-Tests unitarios para funciones de procesamiento
+Unit tests for processing functions
 
-Scheduling con Airflow
+Scheduling with Airflow
 
-Enriquecimiento con más APIs
+Enrichment with more APIs
 
-Visualización con dashboards
+Dashboard visualizations
 
-📅 Última ejecución
+📅 Last Run
 
-El estado de la última ejecución está en state/last_extraction.json, usado para controlar las extracciones incrementales.
+The state of the last run is saved in state/last_extraction.json, used to control incremental extractions.
 
-Implementacion: El proyecto debe implementarse de forma tal que su ejecucion sea periodicamente cada una hora o  menos.
+Implementation: The project must be implemented to run periodically every hour or less.
 
-Autor: German Rodriguez. Proyecto academico para Certificacion de Data Engineer
+Author: German Rodriguez. Academic project for Data Engineer Certification.
+
